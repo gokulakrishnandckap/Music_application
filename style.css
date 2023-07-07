@@ -1,0 +1,14 @@
+.header{
+
+    background-color:  wheat;
+    height: 70px;
+    width: 100%;
+}
+
+.searchuser{
+
+    height: 35px;
+    width: 500px;
+    margin-left: 450px;
+    margin-top: 10px;
+}
