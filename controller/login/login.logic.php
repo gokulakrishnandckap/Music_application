@@ -14,7 +14,8 @@ if($email && $password)
 {
     $data = $conn['db']->query("SELECT * FROM users where email='$email' and password = '$password'");
     $exits = $data->fetchAll();
-    // var_dump($exits[0]['is_admin']);
+    $_SESSION['admin'] = $exits[0]['is_admin'];
+
     if($exits && $exits[0]['is_admin'] == 0)
     {
         $_SESSION['login'] = [
@@ -24,6 +25,7 @@ if($email && $password)
         $_SESSION['id'] = [
             'id' => $exits[0]['id']
         ];
+  
         
         header('location:/users');
     }
@@ -32,10 +34,16 @@ if($email && $password)
         $_SESSION['login'] = [
             'username' => $exits[0]['username']
         ];
+        $_SESSION['is_admin'] = $exits[0]['is_admin'];
         header('location:/admin');
     }
     else{
        $_SESSION['Incorrect Details'] = "Incorrect Details";
         header('location:/login');
     }
+
+}
+else
+{
+    header('location:/');
 }

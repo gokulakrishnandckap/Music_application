@@ -1,70 +1,67 @@
+<?php
+
+$conn['db'] = (new Database())->db;
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>
-        Music application
-    </title>
-    <link rel="stylesheet" href="style.css">
-
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <form action="/search" method="POST">
-            <input type="search" class="searchuser" name="search" placeholder = "search">
-            <button type="sumbit" class= "btn" name="searc">search</button>
-            </form>
-           <!-- <a href="/createlist"><button name= "check" value="<?php echo $_SESSION['id']['id'];?>">Create playlist</button></a>  -->
-           <form action="/createlist" method="POST">
-            <button name="add" value="<?php echo $_SESSION['id']['id'];?>">Create playlist</button>
-            </form>
-           <a href="/yourlist"><button>yourlist</button></a> 
-            <a href="/logout"><button>logout</button></a> 
-            <form action="/addpremium" method="POST">
-            <button name="add" value="<?php echo $_SESSION['id']['id'];?>">Add premium</button>
-            </form>
-        </div><br><br><br>
+        try{
+            if($_SESSION['id']['id']){
+                $statement = $conn['db']->prepare("SELECT songs.id,songs.name,artist.name as artname,images.image_path FROM songs join artist on songs.artist_id = artist.id join images on songs.id = images.model_id  AND images.model_name = 'song'");
+                $statement->execute();
+                $allsongs = $statement->fetchAll();
+                $_SESSION['allsongs'] =  $allsongs;
 
 
-        <div class="share">
-        <form action="/share" method="POST">
-            <button name="add" value="<?php echo $_SESSION['id']['id'];?>">share</button>
-            </form>
-        </div>
 
-        <h3>Hello <?php echo $_SESSION['login']['username'];?> </h3>
+                $state = $conn['db']->prepare("SELECT artist.id,artist.name,images.image_path FROM artist join images on artist.id = images.model_id  AND images.model_name = 'artist'");
+                $state->execute();
+                $allartist = $state->fetchAll();
+                // var_dump($allartist);
+                $_SESSION['allartist'] =  $allartist;
 
-        <div class="img">
-            <?php foreach($_SESSION['artimage'] as $single):?>
-                 <img src="<?php echo $single['image_path'];?>" alt="" width="200px" > 
-            <?php endforeach;?>   
-           
-<!-- <?php var_dump($_SESSION['imgs']);?> -->
-            <?php foreach( $_SESSION['song'] as $song):?>
+
+                $query = $conn['db']->prepare("SELECT artist_id,artist.name FROM follow join artist on artist.id = follow.artist_id join users on users.id = follow.user_id where users.id = ".$_SESSION['id']['id']);
+                $query->execute();
+                $follow = $query->fetchAll();
+                // var_dump($follow);
                 
-                <div class="songs">
-                    <form action="/addingsong" method="POST">
-                        <!-- <img src="<?php echo $song;?>" alt=""> -->
-                    <audio src="<?php echo $song['name'];?>"  controls></audio>  
-                        <button type="submit" name="playlist" value="<?php echo $song['id'];?>">AddPlaylist</button>
-                    </form>
-                </div>
-          
-            <?php endforeach;?>   
-            
+                $array = [];
+                foreach($follow as $val)
+                {
+                    
+                    array_push($array,$val['artist_id']);
 
-            </div>
-    </div>
+                }
+                $_SESSION['follow'] =  $array;
+           
+   
+           
+            require "view/user.view.php";
+
+            }
+            else
+            {
+                $statement = $conn['db']->prepare("SELECT songs.id,songs.name,artist.name as artname,images.image_path FROM songs join artist on songs.artist_id = artist.id join images on songs.id = images.model_id  AND images.model_name = 'song'");
+                $statement->execute();
+                $allsongs = $statement->fetchAll();
+                $_SESSION['allsongs'] =  $allsongs;
 
 
 
-</body>
+                $state = $conn['db']->prepare("SELECT artist.id,artist.name,images.image_path FROM artist join images on artist.id = images.model_id  AND images.model_name = 'artist'");
+                $state->execute();
+                $allartist = $state->fetchAll();
+                // var_dump($allartist);
+                $_SESSION['allartist'] =  $allartist;
 
-</html>
+
+                require "view/user.view.php";
+            }
+
+        }
+        catch(Expection $e)
+        {
+            die($e->getMessage());
+        }
+
+
+
